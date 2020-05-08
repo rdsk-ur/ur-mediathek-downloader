@@ -50,7 +50,7 @@ def main(video_url, timeout=20):
         print("Video title:", video_name)
         print("Manifest URL:", manifest_url)
         print("Starting youtube-dl")
-        os.system(f"youtube-dl '{manifest_url}'")
+        os.system(f"youtube-dl -o '{video_name}%(EXT)s' '{manifest_url}'")
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="""A tool to download videos from the UR Mediathek.
