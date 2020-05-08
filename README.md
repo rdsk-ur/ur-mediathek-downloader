@@ -8,7 +8,8 @@ Downloads a video file from the UR Medithek.
 
 1. Install the [selenium-wire](https://github.com/wkeeling/selenium-wire) package from pip.
 2. Install [youtube-dl](http://ytdl-org.github.io/youtube-dl/)
-3. You need to have a `credentials.json` file in the same directory as `download_video.py` with the following content:
+3. Install the Firefox browser
+4. You need to have a `credentials.json` file in the same directory as `download_video.py` with the following content:
 
     ``` json
     {

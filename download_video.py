@@ -5,6 +5,7 @@ import sys
 import json
 from argparse import ArgumentParser
 from seleniumwire import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
 
 def main(video_url, timeout=20):
@@ -19,7 +20,10 @@ def main(video_url, timeout=20):
         print("credentials.json is no valid JSON file")
         return
 
-    with webdriver.Firefox() as driver:
+    print("Launch headless browser")
+    options = Options()
+    options.headless = True
+    with webdriver.Firefox(options=options) as driver:
         driver.get(sys.argv[1])
 
         print("Enter credentials")
