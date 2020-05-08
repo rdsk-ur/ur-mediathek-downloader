@@ -8,11 +8,12 @@ from seleniumwire import webdriver
 from selenium.common.exceptions import TimeoutException
 
 def main(video_url, timeout=20):
+    credentials_path = os.path.dirname(__file__) + "/credentials.json"
     try:
-        with open("credentials.json") as credentials_file:
+        with open(credentials_path) as credentials_file:
             credentials = json.load(credentials_file)
     except FileNotFoundError:
-        print("credentials.json is missing. Please read the readme for more details")
+        print(credentials_path, "is missing. Please read the readme for more details")
         return
     except json.decoder.JSONDecodeError:
         print("credentials.json is no valid JSON file")
