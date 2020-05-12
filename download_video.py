@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import json
 from argparse import ArgumentParser
 from seleniumwire import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
 
-def main(video_url, timeout=20):
-    credentials_path = os.path.dirname(__file__) + "/credentials.json"
+def main(video_url, timeout=20, title=None):
+    credentials_path = os.path.dirname(os.path.realpath(__file__)) + "/credentials.json"
     try:
         with open(credentials_path) as credentials_file:
             credentials = json.load(credentials_file)
@@ -20,11 +19,11 @@ def main(video_url, timeout=20):
         print("credentials.json is no valid JSON file")
         return
 
-    print("Launch headless browser")
+    print("Launch headless firefox")
     options = Options()
     options.headless = True
     with webdriver.Firefox(options=options) as driver:
-        driver.get(sys.argv[1])
+        driver.get(video_url)
 
         print("Enter credentials")
         acount_name = credentials["account"]
@@ -42,7 +41,10 @@ def main(video_url, timeout=20):
             print("Consider increasing the timeout by setting the --timeout option")
             return
 
-        video_name = driver.find_element_by_css_selector("h5.card-title").text
+        if title is None:
+            video_name = driver.find_element_by_css_selector("h5.card-title").text
+        else:
+            video_name = title
 
     if manifest_url is None:
         print("Could not find a manifest")
@@ -58,6 +60,7 @@ if __name__ == "__main__":
     """)
     parser.add_argument("url", help="The URL of the site that shows the video. Usually begins with https://mediathek2.uni-regensburg.de/playthis/")
     parser.add_argument("--timeout", default=20, help="The number of seconds that will be waited until the manifest is requested.")
+    parser.add_argument("--title", default=None, help="Overwrite the title derived from the mediathek.")
 
     args = parser.parse_args()
-    main(args.url, args.timeout)
+    main(args.url, args.timeout, args.title)
