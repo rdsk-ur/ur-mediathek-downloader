@@ -18,6 +18,8 @@ Downloads a video file from the UR Medithek.
     }
     ```
 
+Tip: Restrict the read permissions to the `credentials.json` file, e.g. on linux: `chmod 600 credentials.json`
+
 Well, replace the entries with your own login information.
 
 ### Usage
