@@ -34,11 +34,11 @@ def main(channel_url):
             else:
                 # video
                 print("video @", asset_url)
-                asset_urls.append((asset_url, False))
+                asset_urls.append((asset_url, True))
 
         for asset_url, is_video in asset_urls:
             if is_video:
-                download_video(asset_url, driver)
+                download_video(asset_url, driver, skip_auth=True)
             else:
                 download_audio(asset_url)
 

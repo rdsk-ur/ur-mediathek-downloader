@@ -8,14 +8,17 @@ from selenium.common.exceptions import TimeoutException
 
 from util import authenticate, get_credentials
 
-def download_video(video_url, driver, timeout=20, title=None):
-    try:
-        credentials = get_credentials()
-    except:
-        return
+def download_video(video_url, driver, timeout=20, title=None, skip_auth=False):
+    if not skip_auth:
+        try:
+            credentials = get_credentials()
+        except:
+            return
 
     driver.get(video_url)
-    authenticate(driver, credentials)
+
+    if not skip_auth:
+        authenticate(driver, credentials)
 
     print("Wait for manifest request")
     try:
