@@ -15,6 +15,7 @@ def download_video(video_url, driver, timeout=20, title=None, skip_auth=False):
         except:
             return
 
+    del driver.requests
     driver.get(video_url)
 
     if not skip_auth:
