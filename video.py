@@ -41,7 +41,7 @@ def download_video(video_url, driver, timeout=20, title=None, skip_auth=False):
         print("Video title:", video_name)
         print("Manifest URL:", manifest_url)
         print("Starting youtube-dl")
-        os.system(f"youtube-dl -o '{video_name}%(EXT)s' '{manifest_url}'")
+        os.system(f"youtube-dl -o '{video_name}.mp4' '{manifest_url}'")
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="""A tool to download videos from the UR Mediathek.
