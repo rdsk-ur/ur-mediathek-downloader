@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import time
+from pathlib import Path
 from seleniumwire import webdriver
 from selenium.webdriver.firefox.options import Options
 
@@ -27,6 +28,13 @@ def main(channel_url):
         asset_urls = []
         for entry in driver.find_elements_by_css_selector("div.urtube-asset-card"):
             asset_url = entry.find_element_by_css_selector("a").get_attribute("href")
+
+            asset_title = entry.find_element_by_css_selector(".card-body h5.card-title").text
+            # check if this file already exists
+            if len(list(Path(".").glob(f"{asset_title}.*"))) > 0:
+                print(asset_title, "already exists")
+                continue
+
             if entry.find_element_by_css_selector("img").get_attribute("src") == "https://mediathek2.uni-regensburg.de/img/audio-only.png":
                 # audio
                 print("audio @", asset_url)
