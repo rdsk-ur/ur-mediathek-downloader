@@ -1,5 +1,6 @@
-import os
 import json
+import os
+
 
 def get_credentials():
     credentials_path = os.path.dirname(os.path.realpath(__file__)) + "/credentials.json"
@@ -10,6 +11,7 @@ def get_credentials():
         print(credentials_path, "is missing. Please read the readme for more details")
     except json.decoder.JSONDecodeError:
         print("credentials.json is no valid JSON file")
+
 
 def authenticate(driver, credentials):
     print("Enter credentials")

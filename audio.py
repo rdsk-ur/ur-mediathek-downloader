@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-import sys
 from argparse import ArgumentParser
+from pathlib import Path
+
 import requests
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 from util import authenticate, get_credentials
 
 # width of the download progress bar
 BAR_SIZE = 50
+
 
 def download_audio(audio_url, driver, title=None, is_authenticated=False):
     if not is_authenticated:
@@ -67,11 +68,13 @@ def download_audio(audio_url, driver, title=None, is_authenticated=False):
                 print(f"\r[", '=' * done, ' ' * (BAR_SIZE - done), "]", sep="", end="", flush=True)
     print()
 
+
 if __name__ == "__main__":
     parser = ArgumentParser(description="""A tool to download audio from the UR Mediathek.
     To use it, you must have a credentials.json file in the current directory which contains the keys 'account' and 'password'.
     """)
-    parser.add_argument("url", help="The URL of the site that shows the audio. Usually begins with https://mediathek2.uni-regensburg.de/playthis/")
+    parser.add_argument("url",
+                        help="The URL of the site that shows the audio. Usually begins with https://mediathek2.uni-regensburg.de/playthis/")
     parser.add_argument("--title", default=None, help="Overwrite the title derived from the mediathek.")
 
     args = parser.parse_args()

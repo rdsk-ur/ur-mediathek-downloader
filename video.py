@@ -2,11 +2,13 @@
 
 import os
 from argparse import ArgumentParser
-from seleniumwire import webdriver
-from selenium.webdriver.firefox.options import Options
+
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.firefox.options import Options
+from seleniumwire import webdriver
 
 from util import authenticate, get_credentials
+
 
 def download_video(video_url, driver, timeout=20, title=None, skip_auth=False):
     if not skip_auth:
@@ -46,12 +48,15 @@ def download_video(video_url, driver, timeout=20, title=None, skip_auth=False):
         if status != 0:
             raise ChildProcessError()
 
+
 if __name__ == "__main__":
     parser = ArgumentParser(description="""A tool to download videos from the UR Mediathek.
     To use it, you must have a credentials.json file in the current directory which contains the keys 'account' and 'password'.
     """)
-    parser.add_argument("url", help="The URL of the site that shows the video. Usually begins with https://mediathek2.uni-regensburg.de/playthis/")
-    parser.add_argument("--timeout", type=int, default=20, help="The number of seconds that will be waited until the manifest is requested.")
+    parser.add_argument("url",
+                        help="The URL of the site that shows the video. Usually begins with https://mediathek2.uni-regensburg.de/playthis/")
+    parser.add_argument("--timeout", type=int, default=20,
+                        help="The number of seconds that will be waited until the manifest is requested.")
     parser.add_argument("--title", default=None, help="Overwrite the title derived from the mediathek.")
 
     args = parser.parse_args()
