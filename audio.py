@@ -1,67 +1,44 @@
 #!/usr/bin/env python3
 
+import os
+import re
 from argparse import ArgumentParser
-from pathlib import Path
-
-import requests
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support.expected_conditions import presence_of_element_located
-from selenium.webdriver.support.ui import WebDriverWait
-
-from util import authenticate, get_credentials
 
 # width of the download progress bar
 BAR_SIZE = 50
 
 
-def download_audio(audio_url, driver, title=None, is_authenticated=False):
-    if not is_authenticated:
-        try:
-            credentials = get_credentials()
-        except:
-            return
+def download_audio(audio_url, session, title=None):
+    res = session.get(audio_url)
+    onelined = re.sub(r"\s+", " ", res.text)
 
-    driver.get(audio_url)
+    if not title:
+        title = re.findall(r"<div class=\"card-header\">\s*<h3>(.*)</h3>", onelined)[0]
 
-    if not is_authenticated:
-        authenticate(driver, credentials)
-
-        wait = WebDriverWait(driver, 10)
-        wait.until(presence_of_element_located((By.CSS_SELECTOR, ".card-header h3")))
-
-    if title is None:
-        audio_title = driver.find_element_by_css_selector("h4[dusk='asset_title']").text.strip()
-    else:
-        audio_title = title
-
-    channel_url = driver.find_element_by_css_selector("a.btn.btn-primary").get_attribute("href")
-
-    channel_id = channel_url.split("/")[-1]
-
+    channel_id = re.findall(r"https://mediathek2\.uni-regensburg\.de/list/(\d+)", onelined)[0]
     audio_id = audio_url.split("/")[-1]
+
     stream_url = f"https://stream5.uni-regensburg.de/audio/grips/{channel_id}/{audio_id}.mp3"
     print(stream_url)
 
-    output_filename = f"{audio_title}.mp3"
-    if Path(output_filename).exists():
+    output_filename = f"{title}.mp3"
+    if os.path.exists(output_filename):
         print(output_filename, "already exists")
         return
 
     # https://stackoverflow.com/a/15645088
-    print("Downloading", audio_title)
+    print("Downloading", title)
     with open(output_filename, "wb") as f:
-        response = requests.get(stream_url, stream=True)
-        total_length = response.headers.get('content-length')
+        res = session.get(stream_url, stream=True)
+        total_length = res.headers.get('content-length')
 
         if total_length is None:
             # no content length header
-            f.write(response.content)
+            f.write(res.content)
         else:
             dl = 0
             total_length = int(total_length)
-            for data in response.iter_content(chunk_size=4096):
+            for data in res.iter_content(chunk_size=4096):
                 dl += len(data)
                 f.write(data)
                 done = int(BAR_SIZE * dl / total_length)
@@ -70,6 +47,8 @@ def download_audio(audio_url, driver, title=None, is_authenticated=False):
 
 
 if __name__ == "__main__":
+    from util import get_authenticated_session, get_credentials
+
     parser = ArgumentParser(description="""A tool to download audio from the UR Mediathek.
     To use it, you must have a credentials.json file in the current directory which contains the keys 'account' and 'password'.
     """)
@@ -79,7 +58,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    options = Options()
-    options.headless = True
-    with webdriver.Firefox(options=options) as driver:
-        download_audio(args.url, driver, args.title)
+    print("Starting session")
+    session = get_authenticated_session(get_credentials())
+    download_audio(args.url, session, args.title)
