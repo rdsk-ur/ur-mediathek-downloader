@@ -12,7 +12,6 @@ Alternatively, you can use the `requirements.txt` file and run `pip install -r r
 
 You can also manually install the following packages:
 
-+ beautifulsoup4
 + requests
 + selenium-wire
 
