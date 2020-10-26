@@ -44,11 +44,20 @@ def main(channel_url):
                 print("video @", asset_url)
                 asset_urls.append((asset_url, True))
 
+        error_assets = []
         for asset_url, is_video in asset_urls:
             if is_video:
-                download_video(asset_url, driver, skip_auth=True)
+                try:
+                    download_video(asset_url, driver, skip_auth=True)
+                except ChildProcessError:
+                    error_assets.append(asset_url)
             else:
                 download_audio(asset_url)
+
+    if len(error_assets) > 0:
+        print("\nThe following assets could not be downloaded:")
+        for asset_url in error_assets:
+            print(asset_url)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

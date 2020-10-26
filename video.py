@@ -42,7 +42,9 @@ def download_video(video_url, driver, timeout=20, title=None, skip_auth=False):
         print("Video title:", video_name)
         print("Manifest URL:", manifest_url)
         print("Starting youtube-dl")
-        os.system(f"youtube-dl -o '{video_name}.mp4' '{manifest_url}'")
+        status = os.system(f"youtube-dl -o '{video_name}.mp4' '{manifest_url}'")
+        if status != 0:
+            raise ChildProcessError()
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="""A tool to download videos from the UR Mediathek.
@@ -58,4 +60,7 @@ if __name__ == "__main__":
     options = Options()
     options.headless = True
     with webdriver.Firefox(options=options) as driver:
-        download_video(args.url, driver, args.timeout, args.title)
+        try:
+            download_video(args.url, driver, args.timeout, args.title)
+        except ChildProcessError:
+            print("youtube-dl failed, please try again")
