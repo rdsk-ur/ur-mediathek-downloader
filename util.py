@@ -1,5 +1,8 @@
 import json
 import os
+import re
+
+from requests import Session
 
 
 def get_credentials():
@@ -13,10 +16,20 @@ def get_credentials():
         print("credentials.json is no valid JSON file")
 
 
-def authenticate(driver, credentials):
-    print("Enter credentials")
-    acount_name = credentials["account"]
-    password = credentials["password"]
-    driver.execute_script(f"document.querySelector('#frmLoginRzaccout').value='{acount_name}'")
-    driver.execute_script(f"document.querySelector('#frmLoginPassword').value='{password}'")
-    driver.execute_script('document.querySelector("form.form-signin button").click()')
+def get_authenticated_session(credentials):
+    print("Authenticating")
+    session = Session()
+    session.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0"
+
+    res = session.get("https://mediathek2.uni-regensburg.de/login")
+    token = re.findall(r"name=\"_token\" value=\"(.+)\"", res.text)[0]
+
+    data = {
+        "frmLoginRzaccount": credentials["username"],
+        "frmLoginPassword": credentials["password"],
+        "_token": token
+    }
+    res = session.post("https://mediathek2.uni-regensburg.de/login", data=data)
+    res.raise_for_status()
+
+    return session
