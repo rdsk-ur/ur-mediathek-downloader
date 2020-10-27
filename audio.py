@@ -15,10 +15,7 @@ def download_audio(audio_url, session, title=None):
     if not title:
         title = re.findall(r"<div class=\"card-header\">\s*<h3>(.*)</h3>", onelined)[0]
 
-    channel_id = re.findall(r"https://mediathek2\.uni-regensburg\.de/list/(\d+)", onelined)[0]
-    audio_id = audio_url.split("/")[-1]
-
-    stream_url = f"https://stream5.uni-regensburg.de/audio/grips/{channel_id}/{audio_id}.mp3"
+    stream_url = re.findall(r".*src:\ '(https://stream5.uni-regensburg.de/audio.*\.mp3.*)'}\);.*", onelined)[0]
     print(stream_url)
 
     output_filename = f"{title}.mp3"
