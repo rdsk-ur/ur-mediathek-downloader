@@ -50,9 +50,3 @@ Downloads an audio file from the mediathek and stores it in the current director
 Using you browser, navigate to the video in the mediathek. Copy the full URL (should look like `https://mediathek2.uni-regensburg.de/playthis/<AUDIO_ID>`). Then, run
 
     python3 audio.py <COPIED_URL>
-
-## `channel.py`
-
-Utility script to download all assets from a given channel.
-
-    python3 channel.py <CHANNEL_URL>
