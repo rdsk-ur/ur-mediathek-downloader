@@ -8,7 +8,7 @@ If you have suggestions or found bugs, feel free to open an issue or create a pu
 
 1. Install Python
 2. Install the `requests` package using `pip install requests`
-3. Install the [ffmpeg](https://ffmpeg.org/download.html)
+3. Install [ffmpeg](https://ffmpeg.org/download.html)
 
 You need to create a `credentials.json` file in this directory with the following content:
 
