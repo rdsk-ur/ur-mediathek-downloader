@@ -7,8 +7,8 @@ If you have suggestions or found bugs, feel free to open an issue or create a pu
 ## Installation
 
 1. Install Python
-2. Install the `requests` package using `pip install requests`.
-3. Install [youtube-dl](https://youtube-dl.org/) with either putting it in your working directory or adding it to your `PATH` environment variable.
+2. Install the `requests` package using `pip install requests`
+3. Install the [ffmpeg](https://ffmpeg.org/download.html)
 
 You need to create a `credentials.json` file in this directory with the following content:
 

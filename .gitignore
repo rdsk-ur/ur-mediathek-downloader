@@ -4,9 +4,6 @@ venv/
 
 *.log
 
-# files created by youtube-dl
-*.part
-*.ytdl
 *.mp4
 *.mp3
 
