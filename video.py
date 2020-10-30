@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import re
-import subprocess
 from argparse import ArgumentParser
+from vlc_wrapper import start_vlc, log_progress
 
 
 def download_video(video_url, session, title=None):
@@ -15,8 +15,9 @@ def download_video(video_url, session, title=None):
 
     print("Video title:", title)
     print("Manifest URL:", manifest_url)
-    print("Starting youtube-dl")
-    subprocess.run(["youtube-dl", "-o", f"{title}.mp4", manifest_url])
+    print("Starting VLC")
+    vlc = start_vlc(manifest_url, title + ".mp4")
+    log_progress(vlc)
 
 
 if __name__ == "__main__":
