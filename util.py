@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from logging import info, error
 
 from requests import Session
 
@@ -11,13 +12,13 @@ def get_credentials():
         with open(credentials_path) as credentials_file:
             return json.load(credentials_file)
     except FileNotFoundError:
-        print(credentials_path, "is missing. Please read the readme for more details")
+        error(credentials_path, "is missing. Please read the readme for more details")
     except json.decoder.JSONDecodeError:
-        print("credentials.json is no valid JSON file")
+        error("credentials.json is no valid JSON file")
 
 
 def get_authenticated_session(credentials):
-    print("Authenticating")
+    info("Authenticating")
     session = Session()
     session.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0"
 
