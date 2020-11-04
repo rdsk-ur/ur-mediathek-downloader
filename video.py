@@ -45,10 +45,13 @@ def get_segments(manifest_url):
         time = 0
         timeline = template.find(namespace + "SegmentTimeline")
         for s in timeline:
-            segment_urls[channel].append(base_url + media.replace("$Time$", str(time)))
-
             d = int(s.attrib["d"])
-            time += d
+            r = 1
+            if "r" in s.attrib:
+                r += int(s.attrib["r"])
+            for i in range(r):
+                segment_urls[channel].append(base_url + media.replace("$Time$", str(time)))
+                time += d
 
         segment_urls[channel].append(base_url + media.replace("$Time$", str(time)))
 
@@ -66,7 +69,6 @@ def merge_segments(segment_urls, output_filename):
             print()
 
     print("Merge using ffmpeg")
-    # TODO: -c copy skips the first 4 seconds of a video, what's going on there?
     subprocess.run(["ffmpeg", "-i", "_audio.mp4", "-i", "_video.mp4", "-c", "copy", output_filename])
     print("Merge complete, you can remove _audio.mp4 and _video.mp4")
 
