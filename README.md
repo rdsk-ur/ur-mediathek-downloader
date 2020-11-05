@@ -6,11 +6,23 @@ This repository contains scripts to download assets from the UR mediathek.
 
 If you have suggestions or found bugs, feel free to open an issue or create a pull request!
 
+## Requirements
+
+1. Install Python
+2. Install the `requests` package using `pip install requests`
+3. Install [ffmpeg](https://ffmpeg.org/download.html)
+
 ## GUI
 
-The gui provides functionality to download any video from the mediathek that you have access to.
+The GUI provides functionality to download any video from the mediathek that you have access to.
 
 ![Screenshot](screenshot.jpg)
+
+### Usage
+
+In addition to the mentioned requirements, you also need to install the `PyQt5` package using `pip install PyQt5`
+
+You can run the GUI using `python3 gui.py`
 
 ### Build the GUI as a single executable file
 
@@ -18,13 +30,9 @@ Run `make` or `pyinstaller gui.py -F --name ur-downloader`.
 
 ## CLI
 
-Alternatively, you can use the command line directly:
+Alternatively, you can use the command line tools:
 
-### Installation
-
-1. Install Python
-2. Install the `requests` package using `pip install requests`
-3. Install [ffmpeg](https://ffmpeg.org/download.html)
+### Setup
 
 You need to create a `credentials.json` file in this directory with the following content:
 
