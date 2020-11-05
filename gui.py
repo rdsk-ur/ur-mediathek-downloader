@@ -1,8 +1,8 @@
 import sys
 import logging
-from logging import info
+from logging import info, error, warning
 from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QApplication, QProgressBar, QLabel, QLineEdit, QFileDialog, QPlainTextEdit
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread, QObject
 import requests
 import subprocess
 import time
@@ -23,74 +23,90 @@ class ConvertThread(QThread):
         self.password = password
 
     def run(self):
-        # TODO: catch exceptions in the whole process
         self.update.emit(0)
         self.total.emit(1)
 
-        # TODO: handle bad password
-        session = util.get_authenticated_session({
-            "username": self.username,
-            "password": self.password,
-        })
-        meta = video.get_meta(self.url, session)
-        info(f"Manifest: " + meta["manifest_url"])
-        segments = video.get_segments(meta["manifest_url"])
+        try:
+            session = util.get_authenticated_session({
+                "username": self.username,
+                "password": self.password,
+            })
+            meta = video.get_meta(self.url, session)
+            info(f"Manifest: " + meta["manifest_url"])
+            segments = video.get_segments(meta["manifest_url"])
 
-        len_audio = len(segments["audio"])
-        len_video = len(segments["video"])
-        info(f"{len_audio} audio segments")
-        info(f"{len_video} video segments")
+            len_audio = len(segments["audio"])
+            len_video = len(segments["video"])
+            info(f"{len_audio} audio segments")
+            info(f"{len_video} video segments")
 
-        self.total.emit(len_audio + len_video)
-        v = 0
+            self.total.emit(len_audio + len_video)
+            v = 0
 
-        info("Write video")
+            info("Download video")
 
-        videopart_name = f"{self.filename}.videopart"
-        audiopart_name = f"{self.filename}.audiopart"
+            videopart_name = f"{self.filename}.videopart"
+            audiopart_name = f"{self.filename}.audiopart"
 
-        with open(videopart_name, "wb") as out_file:
-            for url in segments["video"]:
-                if self.abort:
-                    return
-                res = requests.get(url)
-                out_file.write(res.content)
-                v += 1
-                self.update.emit(v)
+            with open(videopart_name, "wb") as out_file:
+                for url in segments["video"]:
+                    if self.abort:
+                        warning("Aborted")
+                        return
+                    res = requests.get(url)
+                    out_file.write(res.content)
+                    v += 1
+                    self.update.emit(v)
 
-        info("Write audio")
+            info("Download audio")
 
-        with open(audiopart_name, "wb") as out_file:
-            for url in segments["audio"]:
-                if self.abort:
-                    return
-                res = requests.get(url)
-                out_file.write(res.content)
-                v += 1
-                self.update.emit(v)
+            with open(audiopart_name, "wb") as out_file:
+                for url in segments["audio"]:
+                    if self.abort:
+                        warning("Aborted")
+                        return
+                    res = requests.get(url)
+                    out_file.write(res.content)
+                    v += 1
+                    self.update.emit(v)
 
-        info("Merge using ffmpeg")
+            info("Merge using ffmpeg")
 
-        subprocess.run([
-            "ffmpeg",
-            "-i", videopart_name,
-            "-i", audiopart_name,
-            "-c", "copy",
-            self.filename
-        ])
+            subprocess.run([
+                "ffmpeg",
+                "-i", videopart_name,
+                "-i", audiopart_name,
+                "-c", "copy",
+                self.filename
+            ])
 
-        info("Done")
+            info("Done")
+        except Exception as e:
+            error(str(e))
 
-class QLabelLogger(logging.Handler):
+class PlainTextLogger(QObject, logging.Handler):
+    # the signal is required to rediret the LogRecord to the main thread
+    signal = pyqtSignal(str)
     def __init__(self, parent):
         super().__init__()
         self.widget = QPlainTextEdit(parent)
+
+        self.signal.connect(self.add_line)
         logging.getLogger().addHandler(self)
+
         self.widget.setReadOnly(True)
 
     def emit(self, record):
         msg = self.format(record)
-        self.widget.appendPlainText(msg)
+        if record.levelname == "ERROR":
+            msg = f'<span style="color: red">{msg}</span>'
+        elif record.levelname == "WARNING":
+            msg = f'<span style="color: orange">{msg}</span>'
+        self.signal.emit(msg)
+
+    @pyqtSlot(str)
+    def add_line(self, msg):
+        self.widget.appendHtml(msg)
 
 class MyWindow(QWidget):
     def __init__(self):
@@ -118,6 +134,7 @@ class MyWindow(QWidget):
 
         # output file
         self.txt_output = QLineEdit("", self)
+        self.txt_output.setReadOnly(True)
         self.btn_choose = QPushButton("Choose", self)
         self.btn_choose.clicked.connect(self.btn_choose_click)
         grid_layout.addWidget(self.txt_output, 3, 1)
@@ -129,7 +146,7 @@ class MyWindow(QWidget):
         grid_layout.addWidget(self.progress, 4, 0, 1, 3)
 
         # log
-        self.lbl_log = QLabelLogger(self)
+        self.lbl_log = PlainTextLogger(self)
         logging.getLogger().setLevel(logging.INFO)
         grid_layout.addWidget(self.lbl_log.widget, 5, 0, 1, 3)
 
@@ -148,6 +165,7 @@ class MyWindow(QWidget):
                 filename += ".mp4"
             self.txt_output.insert(filename)
 
+    @pyqtSlot()
     def reset_thread(self):
         self.convert_thread = None
         self.btn_download.setText("Download")
@@ -157,11 +175,15 @@ class MyWindow(QWidget):
         if self.convert_thread is not None:
             self.convert_thread.abort = True
         else:
-            # TODO: handle bad input
+            filename = self.txt_output.text()
+            if filename == "":
+                warning("Please provide a file name for the output")
+                return
+
             self.btn_download.setText("Abort")
             self.convert_thread = ConvertThread(
                 url=self.txt_url.text(),
-                filename=self.txt_output.text(),
+                filename=filename,
                 username=self.txt_username.text(),
                 password=self.txt_password.text())
             self.convert_thread.total.connect(self.progress.setMaximum)
@@ -172,6 +194,6 @@ class MyWindow(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     wnd = MyWindow()
-    wnd.resize(700, 350)
+    wnd.resize(700, 400)
     wnd.show()
     sys.exit(app.exec_())

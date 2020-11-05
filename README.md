@@ -51,7 +51,7 @@ The video file will be downloaded and saved in the current working directory.
 
 Use `python3 video.py --help` to show more options.
 
-### Scipt: `audio.py`
+### Script: `audio.py`
 
 Downloads an audio file from the mediathek and stores it in the current directory.
 
@@ -64,5 +64,4 @@ Use `python3 audio.py --help` to show more options.
 ## TODO
 
 + Use a proper python package structure
-+ Handle bad input in gui
 + Include ffmpeg somehow
