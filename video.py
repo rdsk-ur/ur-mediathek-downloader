@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+import os
 import re
+import subprocess
 from argparse import ArgumentParser
 from xml.etree import ElementTree
+
 import requests
-import subprocess
+
 
 def get_meta(video_url, session):
     res = session.get(video_url)
@@ -64,15 +67,19 @@ def merge_segments(segment_urls, output_filename):
     for channel, urls in segment_urls.items():
         with open(f"_{channel}.mp4", "wb") as out_file:
             print(channel, ": ", 0, "/", len(urls), sep="", end="", flush=True)
-            for i, url in enumerate(urls):
+            for i, url in enumerate(urls, start=1):
                 res = requests.get(url)
                 out_file.write(res.content)
                 print("\r", channel, ": ", i, "/", len(urls), sep="", end="", flush=True)
             print()
 
     print("Merge using ffmpeg")
-    subprocess.run(["ffmpeg", "-i", "_audio.mp4", "-i", "_video.mp4", "-c", "copy", output_filename])
-    print("Merge complete, you can remove _audio.mp4 and _video.mp4")
+    subprocess.run(["ffmpeg", "-y", "-i", "_audio.mp4", "-i", "_video.mp4", "-c", "copy", output_filename])
+    print("Merge complete, cleaning up")
+    for channel in segment_urls.keys():
+        os.remove(f"_{channel}.mp4")
+    print("Done.")
+
 
 if __name__ == "__main__":
     from util import get_authenticated_session, get_credentials, get_fs_safe_name
