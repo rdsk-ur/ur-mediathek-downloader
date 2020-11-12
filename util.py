@@ -34,3 +34,13 @@ def get_authenticated_session(credentials):
     res.raise_for_status()
 
     return session
+
+
+def get_fs_safe_name(original):
+    """
+    Make a filename filesystem safe.
+
+    :return: original but only using alphanumeric characters.
+    """
+
+    return "".join([c for c in original if c.isalnum()])

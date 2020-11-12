@@ -18,6 +18,7 @@ def get_meta(video_url, session):
         "title": title,
     }
 
+
 def get_segments(manifest_url):
     segment_urls = {}
 
@@ -57,6 +58,7 @@ def get_segments(manifest_url):
 
     return segment_urls
 
+
 def merge_segments(segment_urls, output_filename):
     print("Download segments")
     for channel, urls in segment_urls.items():
@@ -73,7 +75,7 @@ def merge_segments(segment_urls, output_filename):
     print("Merge complete, you can remove _audio.mp4 and _video.mp4")
 
 if __name__ == "__main__":
-    from util import get_authenticated_session, get_credentials
+    from util import get_authenticated_session, get_credentials, get_fs_safe_name
 
     parser = ArgumentParser(description="""A tool to download videos from the UR Mediathek.
     To use it, you must have a credentials.json file in the current directory which contains the keys 'username' and 'password'.
@@ -92,4 +94,4 @@ if __name__ == "__main__":
     title = meta["title"] if args.title is None else args.title
 
     seg_urls = get_segments(manifest_url)
-    merge_segments(seg_urls, title + ".mp4")
+    merge_segments(seg_urls, get_fs_safe_name(title) + ".mp4")
